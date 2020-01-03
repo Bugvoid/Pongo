@@ -51,7 +51,6 @@ passport.use(
   )
 );
 
-// Passport strategy for authenticating users
 passport.use(
   "localLogin",
   new LocalStrategy(
@@ -71,8 +70,10 @@ passport.use(
           return done(
             null,
             false,
-            req.flash("password", "Oops! Wrong password.")
+            req.flash("password", "Oops! Errouuuu password.")
           );
+
+        console.log("entrou por aqui");
 
         return done(null, user);
       });

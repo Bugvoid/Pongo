@@ -26,4 +26,4 @@ route.post(
   })
 );
 
-
+module.exports = route;
