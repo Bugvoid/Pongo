@@ -39,10 +39,20 @@ app.use(
 );
 
 app.use("/login", require("./routes/login"));
-app.use("register", require("./routes/register"));
+app.use("/register", require("./routes/register"));
+app.use("/settings", require("./routes/settings"));
+app.use("/streams", require("./routes/streams"));
+app.use("/user", require("./routes/user"));
+
+app.get("/logout", (req, res) => {
+  req.logout();
+  return res.redirect("/login");
+});
 
 app.get("*", middleware.ensureLoggedIn(), (req, res) => {
-  res.render("/index");
+  res.render("index");
 });
 
 app.listen(5555, () => console.log("App Listening"));
+node_media_server.run();
+thumbnail_generator.start();
