@@ -1,42 +1,42 @@
 const express = require("express"),
+  path = require("path"),
   Session = require("express-session"),
   bodyParse = require("body-parser"),
+  passport = require("./auth/passport"),
   mongoose = require("mongoose"),
   middleware = require("connect-ensure-login"),
   FileStore = require("session-file-store")(Session),
   config = require("./config/index"),
   flash = require("connect-flash"),
-  passport = require("./auth/passport");
-
-app.use(passport.initialize());
-app.use(passport.session());
-app = express();
-
-mongoose.connect(
-  "mongodb+srv://root:root@cluster0-huzkm.mongodb.net/api_facebook?retryWrites=true",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }
-);
+  port = 5555,
+  app = express(),
+  node_media_server = require("./media_server"),
+  thumbnail_generator = require("./cron/thumbnails");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "./views"));
 app.use(express.static("public"));
+app.use("/thumbnails", express.static("server/thumbnails"));
 app.use(flash());
-app.use(require("cookie-parser"));
+
+app.use(require("cookie-parser")());
 app.use(bodyParse.urlencoded({ extended: true }));
 app.use(bodyParse.json({ extended: true }));
 
 app.use(
   Session({
     store: new FileStore({
-      path: "./server/sessions"
+      path: "backend/sessions"
     }),
     secret: config.server.secret,
-    maxAge: Date().now + 60 * 1000 * 30
+    maxAge: Date().now + 60 * 1000 * 30,
+    resave: true,
+    saveUninitialized: false
   })
 );
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/login", require("./routes/login"));
 app.use("/register", require("./routes/register"));
@@ -53,6 +53,6 @@ app.get("*", middleware.ensureLoggedIn(), (req, res) => {
   res.render("index");
 });
 
-app.listen(5555, () => console.log("App Listening"));
+app.listen(port, () => console.log("Rodando na porta 5555"));
 node_media_server.run();
 thumbnail_generator.start();
